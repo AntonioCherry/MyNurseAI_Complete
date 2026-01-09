@@ -1,5 +1,6 @@
 import streamlit as st
 import os, difflib
+import ollama
 from ollama import chat
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -9,7 +10,10 @@ from app.models.user import User
 from app.security_components.check_therapy import is_therapy_related
 from app.security_components.PII_obfuscation import obscure_pii
 from app.security_components.prompt_sanitizer import sanitize_user_prompt
+from app.config import OLLAMA_BASE_URL
 
+
+ollama.base_url =  OLLAMA_BASE_URL
 class OllamaWrapper:
     def __init__(self, model_name):
         self.model_name = model_name
