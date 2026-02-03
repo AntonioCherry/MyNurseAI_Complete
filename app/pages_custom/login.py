@@ -6,6 +6,10 @@ from app.pages_custom.registrazione import register_page
 from app.pages_custom.area_personale import area_personale
 
 def login_page(db):
+    """
+    Funzione che gestisce la logica di login alla piattaforma.
+    :param db: istanza del db relazionale
+    """
     # --- Inizializza lo stato ---
     if "show_register" not in st.session_state:
         st.session_state.show_register = False

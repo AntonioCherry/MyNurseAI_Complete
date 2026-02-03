@@ -47,6 +47,11 @@ FLATTENED = [(k, re.compile(p, re.IGNORECASE | re.DOTALL)) for k, ps in PATTERNS
 
 # --- Helpers ---
 def normalize_text(text: str) -> str:
+    """
+    Funzione che normalizza il testo.
+    :param text: testo da normalizzare
+    :return: testo normalizzato
+    """
     text = unicodedata.normalize("NFKC", text)
     for ch in ("\u200b", "\u200c", "\u200d", "\ufeff"):
         text = text.replace(ch, "")
@@ -55,6 +60,19 @@ def normalize_text(text: str) -> str:
 
 
 def score_matches(text: str) -> Dict[str, int]:
+    """
+    Calcola il numero di occorrenze per ciascun pattern definito in FLATTENED.
+
+    La funzione verifica se ogni pattern regex è presente nel testo e,
+    in caso positivo, incrementa il contatore associato al nome del pattern.
+
+    Params:
+        text (str): testo in cui cercare i pattern
+
+    Returns:
+        Dict[str, int]: dizionario che associa a ciascun nome di pattern
+        il numero di match trovati nel testo
+    """
     counts: Dict[str, int] = {}
     for name, pattern in FLATTENED:
         if pattern.search(text):
@@ -63,17 +81,45 @@ def score_matches(text: str) -> Dict[str, int]:
 
 
 def long_non_alpha_sequence(text: str, threshold: int = 50) -> bool:
-    for token in re.findall(r"\S{"+str(threshold)+r",}", text):
-        non_alpha_ratio = (sum(1 for c in token if not c.isalpha())
-                           / max(1, len(token)))
+    """
+    Rileva la presenza di sequenze lunghe con alta percentuale di caratteri non alfabetici.
+    La funzione individua token continui (senza spazi) più lunghi della soglia indicata
+    e verifica se la percentuale di caratteri non alfabetici supera il 40%.
+    Questo è utile per identificare input offuscati o potenzialmente malevoli
+    (es. base64, payload codificati, exploit).
+
+    Params:
+        text (str): testo da analizzare
+        threshold (int, opzionale): lunghezza minima della sequenza da considerare.
+            Default: 50
+
+    Returns:
+        bool: True se viene rilevata una sequenza sospetta, False altrimenti
+    """
+    for token in re.findall(r"\S{" + str(threshold) + r",}", text):
+        non_alpha_ratio = (
+            sum(1 for c in token if not c.isalpha()) / max(1, len(token))
+        )
         if non_alpha_ratio > 0.4:
             return True
     return False
 
+
 def classify_prompt_risk_llm(user_input: str) -> Dict[str, str]:
     """
-    Classifica attacchi LLM ignorando completamente privacy e PII.
-    Risponde solo SAFE o UNSAFE.
+    Classifica il rischio di attacchi contro modelli LLM tramite un modello di sicurezza.
+
+    La funzione utilizza un LLM specializzato per rilevare tentativi di prompt injection,
+    jailbreak, override delle istruzioni o altre forme di manipolazione del modello.
+    La valutazione ignora completamente privacy e PII.
+
+    Params:
+        user_input (str): testo dell'utente da classificare
+
+    Returns:
+        Dict[str, str]: dizionario contenente:
+            - "status": SAFE o UNSAFE
+            - "reason": spiegazione sintetica del risultato
     """
     llm_prompt = f"""
         Sei un classificatore di sicurezza specializzato **solo** nel rilevare attacchi
@@ -110,8 +156,16 @@ def classify_prompt_risk_llm(user_input: str) -> Dict[str, str]:
 
 def sanitize_user_prompt(user_input: str) -> str:
     """
-    Sanifica il prompt utente combinando regex e classificatore LLM.
-    Blocca prompt pericolosi o sospetti.
+    Analizza e sanifica il prompt utente per prevenire attacchi contro LLM.
+
+    Params:
+        user_input (str): prompt originale fornito dall'utente
+
+    Returns:
+        str: uno dei seguenti valori:
+            - "error": prompt considerato pericoloso
+            - "warning": prompt potenzialmente sospetto
+            - str: prompt normalizzato e considerato sicuro
     """
     normalized = normalize_text(user_input)
     reasons = []

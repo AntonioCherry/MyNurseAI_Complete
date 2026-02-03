@@ -124,8 +124,12 @@ custom_recognizers = [
 for rec in custom_recognizers:
     analyzer.registry.add_recognizer(rec)
 
-# --- Funzione principale ---
 def obscure_pii(text: str) -> str:
+    """
+    Funzione che sulla base dei pattern definiti, oscura con una stringa default ogni riferimento a PII nel testo che deve analizzare
+    :param text: testo su cui vanno oscurati i PII
+    :return: testo oscurato
+    """
     # Analizza il testo (usa 'en' per compatibilità, regex sono linguisticamente indipendenti)
     results = analyzer.analyze(text=text, language="en")
 

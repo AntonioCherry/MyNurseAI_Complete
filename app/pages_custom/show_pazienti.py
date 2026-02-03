@@ -4,6 +4,11 @@ from app.components.sidebar import sidebar
 from app.models.user import User
 
 def show_pazienti(db, user):
+    """
+        Funzione che gestisce la logica di visualizzazione dei pozienti di un medico.
+        :param db: istanza del db relazionale
+        :param user: utente che ha effettuato l'accesso alla piattaforma
+        """
     sidebar(user)
 
     st.title("🧍‍♂️ Pazienti associati")

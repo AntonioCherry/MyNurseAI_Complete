@@ -5,6 +5,10 @@ from app.models.user import User
 from app.services.auth_service import hash_password
 
 def register_page(db):
+    """
+        Funzione che gestisce la logica di registrazione alla piattaforma.
+        :param db: istanza del db relazionale
+        """
     st.title("MyNurseAI - Registrazione")
     st.subheader("Crea un account")
 

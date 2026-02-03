@@ -2,6 +2,9 @@ from sqlalchemy import Column, Integer, String, LargeBinary
 from app.database.postgres import Base
 
 class Doc(Base):
+    """
+    Classe relativa alla tabella dei documenti memorizzati sul db relazionale
+    """
     __tablename__ = "docs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

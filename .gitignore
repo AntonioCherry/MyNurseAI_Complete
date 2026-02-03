@@ -1,1 +1,6 @@
 .env
+.env.docker
+__pycache__/
+*.pyc
+.venv/
+.idea/

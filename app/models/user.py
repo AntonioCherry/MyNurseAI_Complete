@@ -2,6 +2,9 @@ from sqlalchemy import Column, Integer, String, Date
 from app.database.postgres import Base
 
 class User(Base):
+    """
+    Classe relativa alla tabella Utente memorizzata sul db Relazionale
+    """
     __tablename__ = "users"
     username = Column(String, unique=True, nullable=False)
     email = Column(String, primary_key=True, unique=True, nullable=False)

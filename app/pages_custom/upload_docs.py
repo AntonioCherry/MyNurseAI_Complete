@@ -4,8 +4,6 @@ import io
 import os
 from PyPDF2 import PdfReader
 from app.models.doc import Doc
-
-# Import corretto in base alla versione di LangChain
 try:
     from langchain.text_splitters import CharacterTextSplitter
 except ModuleNotFoundError:
@@ -17,6 +15,11 @@ from app.security_components.doc_validation import validate_pdf_content
 
 
 def upload_docs(db, user):
+    """
+        Funzione che gestisce la logica di upload dei documenti per un paziente.
+        :param db: istanza del db relazionale
+        :param user: utente che ha effettuato l'accesso alla piattaforma
+        """
     sidebar(user)
 
     # --- Controllo paziente selezionato ---

@@ -3,6 +3,11 @@ from app.components.sidebar import sidebar
 from app.models.doc import Doc
 
 def show_docs(db, user):
+    """
+    Funzione che gestisce la logica di visualizzazione dei documenti dei pazienti
+    :param db: istanza del db relazionale
+    :param user: utente che ha effettuato l'accesso alla piattaforma
+    """
     sidebar(user)
 
     st.title(f"📄 Documenti di {user.nome} {user.cognome}")

@@ -4,6 +4,11 @@ from app.pages_custom.show_pazienti import show_pazienti
 
 
 def area_personale(user, db):
+    """
+    Funzione che descrive l'area personale dell'utente
+    :param user: Utente che ha effettuato l'accesso alla piattaforma
+    :param db: Istanza del database relazionale
+    """
     # --- Protezione accesso ---
     if "logged_in" not in st.session_state or not st.session_state.logged_in:
         st.warning("⚠️ Devi prima effettuare il login.")

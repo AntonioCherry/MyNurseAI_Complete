@@ -15,10 +15,33 @@ from app.config import OLLAMA_BASE_URL
 
 ollama.base_url =  OLLAMA_BASE_URL
 class OllamaWrapper:
-    def __init__(self, model_name):
+    """
+    Wrapper per l'uso di un modello Ollama tramite un'interfaccia callable.
+
+    Questa classe incapsula una chiamata al modello Ollama e restituisce
+    l'output in un formato compatibile con pipeline di generazione testo.
+    """
+
+    def __init__(self, model_name: str):
+        """
+        Inizializza il wrapper con il nome del modello.
+
+        Args:
+            model_name (str): nome del modello Ollama da utilizzare
+        """
         self.model_name = model_name
 
-    def __call__(self, prompt):
+    def __call__(self, prompt: str) -> list[dict]:
+        """
+        Esegue una richiesta al modello usando il prompt fornito.
+
+        Args:
+            prompt (str): testo di input da inviare al modello
+
+        Returns:
+            list[dict]: lista contenente un dizionario con la chiave
+            'generated_text' e il testo generato dal modello
+        """
         resp = chat(
             model=self.model_name,
             messages=[{"role": "user", "content": prompt}],
@@ -26,16 +49,29 @@ class OllamaWrapper:
         )
         return [{"generated_text": resp["message"]["content"]}]
 
-    def reset(self):
-        pass
+    def reset(self) -> None:
+        """
+        Reset dello stato interno del wrapper.
 
+        Attualmente non mantiene stato, quindi il metodo è un placeholder.
+        """
+        pass
 
 @st.cache_resource
 def load_model():
+    """
+    Carica il modello specifico da Ollama
+    :return: istanza di OllamaWrapper configurata con il modello "mistral"
+    """
     return OllamaWrapper(model_name="mistral")
 
 
 def load_vectorstore(email_paziente):
+    """
+    Funzione che carica il vector store specifico di un paziente, così da poterne ricavare poi il contesto
+    :param email_paziente: email del paziente di cui si vuole caricare il vectorstore
+    :return: il vectorstore specifico per il paziente richiesto
+    """
     persist_dir = os.path.join("chroma_db", email_paziente)
     if not os.path.exists(persist_dir):
         return None
@@ -52,10 +88,24 @@ def load_vectorstore(email_paziente):
 
 
 def get_pazienti_del_medico(email_medico: str, db: Session):
+    """
+    Funzione che sulla base dell'email del medico ricerca e restituisce nel db relazionale tutti i pazienti a lui associato
+    :param email_medico: emaail del medico di cui si vogliono ricercare i pazienti
+    :param db: istanza del bd relazionale
+    :return: lista dei pazienti
+    """
     return db.query(User).filter(User.medicoAssociato == email_medico).all()
 
 
 def build_rag_prompt(query, retrieved_docs, pazienti_coinvolti=None, contains_therapy: bool = False):
+    """
+
+    :param query: query utente
+    :param retrieved_docs: documenti recuperati in fase di retrival
+    :param pazienti_coinvolti: pazienti coinvolti nella query
+    :param contains_therapy: presenza terapie nei documenti
+    :return: prompt utilizzabile dal chatbot per generare una risposta
+    """
     context = "\n\n".join(retrieved_docs) if retrieved_docs else "(Nessun documento rilevante trovato.)"
     patient_info = f"\nPazienti coinvolti: {pazienti_coinvolti}." if pazienti_coinvolti else ""
 
@@ -96,6 +146,12 @@ def build_rag_prompt(query, retrieved_docs, pazienti_coinvolti=None, contains_th
 
 
 def identify_multiple_pazienti_in_query(query, pazienti):
+    """
+    Funzione che ha lo scopo di identificare quanti più pazienti in una query utente
+    :param query: query utente
+    :param pazienti: pazienti individuati nella query
+    :return: lista pazienti individuati
+    """
     query_lower = query.lower()
     found = []
 
@@ -119,7 +175,8 @@ def identify_multiple_pazienti_in_query(query, pazienti):
 def extract_clinical_event(query: str):
     """
     Estrae le keyword cliniche principali dalla query, invece di tutta la frase.
-    Restituisce una lista di keyword o eventi clinici.
+    :param query utente
+    :return: lista di keywork o eventi clinici
     """
     q = query.lower()
     keywords = ["visita", "controllo", "referto", "esame", "ecografia", "analisi", "terapia", "farmacologica",
@@ -133,6 +190,11 @@ def extract_clinical_event(query: str):
 
 
 def ask_chatbot(db, user):
+    """
+    Funzione che gestisce la logica di interrogazione del chatbot della piattaforma.
+    :param db: istanza del bd relazionale
+    :param user: utente che ha effettuato l'accesso alla piattaforma
+    """
     sidebar(user)
 
     st.title("💬 Chat con il tuo infermiere virtuale")

@@ -1,6 +1,10 @@
 import streamlit as st
 import os, time
 def sidebar(user):
+    """
+    Funzione che descrive il componente della sidebar laterale nell'area utente.
+    :param user: utente che ha effettuato il login
+    """
 # Percorso del file CSS
     css_path = os.path.join("app", "page_styles", "sidebar.css")
 
